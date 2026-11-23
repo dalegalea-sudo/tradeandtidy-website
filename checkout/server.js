@@ -12,12 +12,14 @@ const PRICE = 'price_1UevYRDQHBbGHBSXz0ZtQp0E'; // sandbox only
 const key = process.env.STRIPE_SECRET_KEY || '';
 const stripe = key.startsWith('sk_test_') ? new Stripe(key) : null;
 const base = () => process.env.PUBLIC_URL || 'https://tradeandtidy-checkout.onrender.com';
-app.get('/health',(_,res)=>res.json({ok:true,checkout_ready:!!stripe,mode:'test'}));
+app.get('/health',async(_,res)=>{let connected=false;let correctAccount=false; if(stripe){try{const account=await stripe.accounts.retrieve();connected=true;correctAccount=account.id==='acct_1UawRHDQHBbGHBSX';}catch(e){console.error('Stripe account check:',e.code||e.type||'unknown');}}res.json({ok:true,checkout_ready:!!stripe&&correctAccount,stripe_connected:connected,correct_sandbox_account:correctAccount,mode:'test'});});
 app.get('/',(_,res)=>res.redirect(SITE));
 app.post('/checkout',async (req,res)=>{
   res.set('Cache-Control','no-store');
   if(!stripe) return res.status(503).json({error:'Sandbox checkout is not configured yet.'});
   try{
+    const account=await stripe.accounts.retrieve();
+    if(account.id!=='acct_1UawRHDQHBbGHBSX')return res.status(503).json({error:'The Stripe test key is connected to a different sandbox account. Please use the Trade & Tidy Sandbox secret key.'});
     const session = await stripe.checkout.sessions.create({
       mode:'payment',line_items:[{price:PRICE,quantity:1}],
       client_reference_id:'tradeandtidy-activity-pack',
@@ -28,7 +30,7 @@ app.post('/checkout',async (req,res)=>{
       metadata:{sku:'kids-activity-pack-v1'}
     });
     return res.json({url:session.url});
-  }catch(e){console.error(e.message);return res.status(502).json({error:'Unable to start checkout.'});}
+  }catch(e){console.error('Stripe checkout:',e.code||e.type||e.message);return res.status(502).json({error:e.code==='resource_missing'?'Test product could not be found in the connected sandbox. Please check the Stripe test key.':'Unable to start checkout. Check the connected sandbox key and try again.'});}
 });
 async function paid(id){
   if(!stripe || !/^cs_test_[a-zA-Z0-9]+$/.test(id||'')) return false;

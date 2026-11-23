@@ -78,6 +78,30 @@ app.get('/download',async(req,res)=>{
     let y=164+i*82;doc.fillColor('#136b70').fontSize(15).font('Helvetica-Bold').text(d,66,y);
     doc.strokeColor('#bbd4cd').lineWidth(1).moveTo(170,y+23).lineTo(525,y+23).stroke();
   });
+  doc.addPage();page('COUNT THE STARS!','Count the colourful stars in each row and write the answer.');
+  const groups=[[3,'#efaa50'],[5,'#4eaa9f'],[7,'#b781bd'],[4,'#e67c98']];
+  groups.forEach(([count,color],row)=>{
+    const y=200+row*126;
+    doc.fillColor('#263b52').font('Helvetica-Bold').fontSize(16).text('Row '+(row+1),58,y+10);
+    for(let j=0;j<count;j++){
+      const x=165+j*47;
+      const pts=[];for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5;const rad=k%2?10:23;pts.push([x+rad*Math.cos(a),y+20+rad*Math.sin(a)]);}
+      doc.polygon(...pts.flat()).fill(color);
+    }
+    doc.strokeColor('#879ca7').rect(485,y+1,52,44).stroke();
+  });
+  doc.fillColor('#136b70').fontSize(14).font('Helvetica-Bold').text('You did it! Colour the stars again if you like.',60,710);
+  doc.addPage();page('DRAW YOUR DREAM PET','What would your dream pet look like? Give it a name!');
+  doc.roundedRect(70,170,455,465,20).lineWidth(5).strokeColor('#b5dcd4').stroke();
+  doc.fillColor('#136b70').font('Helvetica-Bold').fontSize(19).text('My pet is called:',75,670);
+  doc.moveTo(244,694).lineTo(520,694).lineWidth(2).strokeColor('#b5dcd4').stroke();
+  doc.addPage();page('MY BIG IDEAS','Plan a fun day! Write or draw your favourite ideas.');
+  [['Something I want to try','#f9d9ad'],['My favourite place','#c4e9e1'],['Something that makes me smile','#efd4ec']].forEach(([label,color],idx)=>{
+     const y=166+idx*185;doc.roundedRect(72,y,452,153,18).fill(color);
+     doc.fillColor('#30495a').font('Helvetica-Bold').fontSize(18).text(label,96,y+20);
+     doc.moveTo(96,y+78).lineTo(490,y+78).lineWidth(1).strokeColor('#8eacb5').stroke();
+     doc.moveTo(96,y+116).lineTo(490,y+116).stroke();
+  });
   doc.end();
 });
 app.listen(process.env.PORT||10000,'0.0.0.0',async()=>{console.log('Trade & Tidy sandbox service running');if(!stripe){console.warn('Stripe sandbox key missing or not a test key');return;}try{const a=await stripe.accounts.retrieve();console.log(a.id==='acct_1UawRHDQHBbGHBSX'?'Stripe Trade & Tidy sandbox account verified':'Stripe key belongs to another account — checkout disabled');}catch(e){console.warn('Stripe test key verification failed:',e.code||e.type||'unknown');}});

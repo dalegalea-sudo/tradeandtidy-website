@@ -1,0 +1,52 @@
+{
+  "classic-a-proper-cup-of-tea-v1": {
+    "name": "A Proper Cup of Tea Poster",
+    "amount": 450,
+    "filename": "Trade_and_Tidy_Classic_01_Proper_Cup_of_Tea.pdf"
+  },
+  "classic-fresh-coffee-fine-company-v1": {
+    "name": "Fresh Coffee & Fine Company Poster",
+    "amount": 450,
+    "filename": "Trade_and_Tidy_Classic_02_Fresh_Coffee.pdf"
+  },
+  "classic-southend-on-sea-v1": {
+    "name": "Southend-on-Sea Poster",
+    "amount": 450,
+    "filename": "Trade_and_Tidy_Classic_03_SouthendonSea.pdf"
+  },
+  "classic-brighton-by-the-sea-v1": {
+    "name": "Brighton by the Sea Poster",
+    "amount": 450,
+    "filename": "Trade_and_Tidy_Classic_04_Brighton_by_the_Sea.pdf"
+  },
+  "classic-amalfi-coast-v1": {
+    "name": "Amalfi Coast Poster",
+    "amount": 450,
+    "filename": "Trade_and_Tidy_Classic_05_Amalfi_Coast.pdf"
+  },
+  "classic-lake-como-v1": {
+    "name": "Lake Como Poster",
+    "amount": 450,
+    "filename": "Trade_and_Tidy_Classic_06_Lake_Como.pdf"
+  },
+  "classic-home-is-where-the-kettle-lives-v1": {
+    "name": "Home Is Where the Kettle Lives Poster",
+    "amount": 450,
+    "filename": "Trade_and_Tidy_Classic_07_Home_and_the_Kettle.pdf"
+  },
+  "classic-keep-a-little-room-for-joy-v1": {
+    "name": "Keep a Little Room for Joy Poster",
+    "amount": 450,
+    "filename": "Trade_and_Tidy_Classic_08_Room_for_Joy.pdf"
+  },
+  "classic-fresh-lemonade-v1": {
+    "name": "Fresh Lemonade Poster",
+    "amount": 450,
+    "filename": "Trade_and_Tidy_Classic_09_Fresh_Lemonade.pdf"
+  },
+  "classic-slow-mornings-v1": {
+    "name": "Slow Mornings Poster",
+    "amount": 450,
+    "filename": "Trade_and_Tidy_Classic_10_Slow_Mornings.pdf"
+  }
+}

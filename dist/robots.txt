@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tradeandtidy.onrender.com/sitemap.xml

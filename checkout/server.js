@@ -2,6 +2,7 @@
 const express = require('express');
 const Stripe = require('stripe');
 const PDFDocument = require('pdfkit');
+const { posters, readClassicPdf } = require('./classic-downloads');
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
@@ -38,6 +39,7 @@ app.post('/checkout',async (req,res)=>{
 });
 
 const CATALOGUE=Object.freeze({
+ ...posters,
  'funny-posters-v1':{price:'price_1UewqcDzYhlkn0Q0N8vPHppe',amount:400,name:'Funny Printable Poster Bundle',filename:'TradeAndTidy-Funny-Posters.pdf'},
  'height-charts-v1':{price:'price_1UewqeDzYhlkn0Q0AZD3fJWl',amount:500,name:"Children's Height Chart Bundle",filename:'TradeAndTidy-Height-Charts.pdf'},
  'seasonal-posters-v1':{price:'price_1UewqfDzYhlkn0Q03Ngy2PxT',amount:400,name:'Christmas Printable Poster Bundle',filename:'TradeAndTidy-Christmas-Posters.pdf'},
@@ -186,6 +188,13 @@ function activitiesPdf(doc){
 }
 function productPdf(sku,res){
  const selected=CATALOGUE[sku];if(!selected)throw new Error('Unknown product');
+ if(Object.hasOwn(posters,sku)){
+  const pdf=readClassicPdf(sku);
+  res.set('Content-Type','application/pdf');
+  res.set('Content-Disposition','attachment; filename="'+selected.filename+'"');
+  res.end(pdf);
+  return;
+ }
  const d=new PDFDocument({size:'A4',margin:0,info:{Title:selected.name,Author:'Trade & Tidy',Subject:'Digital printable'}});
  res.set('Content-Type','application/pdf');res.set('Content-Disposition','attachment; filename="'+selected.filename+'"');
  d.pipe(res);
@@ -203,14 +212,18 @@ app.post('/checkout-live', async(req,res)=>{
  res.set('Cache-Control','no-store');
  if(!liveStripe||!liveKeyVerified)return res.status(503).json({error:'Live checkout is not ready.'});
  const sku=typeof req.body?.sku==='string'?req.body.sku:'kids-activity-pack-v1';
+ if(!Object.hasOwn(CATALOGUE,sku))return res.status(400).json({error:'Product is not available.'});
  const item=CATALOGUE[sku];
- if(!item)return res.status(400).json({error:'Product is not available.'});
+ const isClassic=Object.hasOwn(posters,sku);
+ if(isClassic&&(!item.price||!pdfSmoke.results[sku]?.ok)){
+  return res.status(503).json({error:'This poster is temporarily unavailable. Please try again later.'});
+ }
  try{
   const session=await liveStripe.checkout.sessions.create({
     mode:'payment',line_items:[{price:item.price,quantity:1}],
     client_reference_id:'tradeandtidy-'+sku,
     success_url:base()+'/complete?session_id={CHECKOUT_SESSION_ID}',
-    cancel_url:SITE+'/shop.html',
+    cancel_url:SITE+(isClassic?'/classic-posters.html':'/shop.html'),
     billing_address_collection:'auto',customer_creation:'always',
     metadata:{sku}
   });
@@ -227,8 +240,9 @@ async function verifiedOrder(id){
  if(!client)return null;
  const session=await client.checkout.sessions.retrieve(id);
  const sku=session.metadata?.sku;
+ if(!Object.hasOwn(CATALOGUE,sku))return null;
  const item=CATALOGUE[sku];
- if(!item||session.status!=='complete'||session.payment_status!=='paid'||
+ if(session.status!=='complete'||session.payment_status!=='paid'||
     session.mode!=='payment'||session.currency!=='gbp'||session.amount_total!==item.amount||
     session.livemode!==isLive)return null;
  if(isLive){

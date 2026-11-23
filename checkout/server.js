@@ -36,15 +36,39 @@ app.post('/checkout',async (req,res)=>{
     return res.json({url:session.url});
   }catch(e){console.error('Stripe checkout:',e.code||e.type||e.message);return res.status(502).json({error:e.code==='resource_missing'?'Test product could not be found in the connected sandbox. Please check the Stripe test key.':'Unable to start checkout. Check the connected sandbox key and try again.'});}
 });
+const LIVE_PRICE = 'price_1UewC8DzYhlkn0Q0X1gdzrWP';
+app.post('/checkout-live', async(req,res)=>{
+  res.set('Cache-Control','no-store');
+  if(!liveStripe || !liveKeyVerified) return res.status(503).json({error:'Live Stripe checkout is not available.'});
+  try{
+    const session=await liveStripe.checkout.sessions.create({
+      mode:'payment',line_items:[{price:LIVE_PRICE,quantity:1}],
+      client_reference_id:'tradeandtidy-activity-pack',
+      success_url:base()+'/complete?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url:SITE+'/#activities',
+      billing_address_collection:'required', customer_creation:'always',
+      metadata:{sku:'kids-activity-pack-v1'}
+    });
+    res.json({url:session.url});
+  }catch(e){console.error('Live checkout error:',e.code||e.type||'unknown');res.status(502).json({error:'Unable to start live checkout. Please try again later.'});}
+});
 async function paid(id){
-  if(!stripe || !/^cs_test_[a-zA-Z0-9]+$/.test(id||'')) return false;
-  const session=await stripe.checkout.sessions.retrieve(id);
-  return session.payment_status==='paid' &&
+  if(typeof id!=='string' || id.length>200) return false;
+  const isLive=/^cs_live_[a-zA-Z0-9]+$/.test(id);
+  const isTest=/^cs_test_[a-zA-Z0-9]+$/.test(id);
+  if(!isLive && !isTest) return false;
+  const client=isLive?(liveKeyVerified?liveStripe:null):stripe;
+  if(!client) return false;
+  const session=await client.checkout.sessions.retrieve(id);
+  return session.payment_status==='paid' && session.status==='complete' &&
     session.mode==='payment' && session.metadata?.sku==='kids-activity-pack-v1' &&
-    session.amount_total===600 && session.currency==='gbp';
+    session.amount_total===600 && session.currency==='gbp' &&
+    (isLive?session.livemode===true:session.livemode===false) &&
+    session.client_reference_id==='tradeandtidy-activity-pack';
 }
 app.get('/complete',async(req,res)=>{
   res.set('Cache-Control','no-store');
+  res.set('Referrer-Policy','no-referrer');
   let ok=false;
   try{ok=await paid(req.query.session_id);}catch(e){console.error(e.message);}
   const url='/download?session_id='+encodeURIComponent(req.query.session_id||'');
@@ -52,6 +76,7 @@ app.get('/complete',async(req,res)=>{
 });
 app.get('/download',async(req,res)=>{
   res.set('Cache-Control','private, no-store');
+  res.set('Referrer-Policy','no-referrer');
   try{
     if(!(await paid(req.query.session_id))) return res.status(403).send('Payment not verified.');
   }catch(e){console.error(e.message);return res.status(403).send('Payment not verified.');}
@@ -108,5 +133,5 @@ app.get('/download',async(req,res)=>{
   });
   doc.end();
 });
-app.get('/live-readiness',(_,res)=>{res.set('Cache-Control','no-store');res.json({live_account_verified:liveKeyVerified,live_checkout_enabled:false,sandbox_checkout_enabled:!!stripe,download_flow_tested_in_sandbox:true});});
+app.get('/live-readiness',(_,res)=>{res.set('Cache-Control','no-store');res.json({live_account_verified:liveKeyVerified,live_checkout_enabled:liveKeyVerified,sandbox_checkout_enabled:!!stripe,download_flow_tested_in_sandbox:true});});
 app.listen(process.env.PORT||10000,'0.0.0.0',async()=>{console.log('Trade & Tidy sandbox service running');if(!stripe){console.warn('Stripe sandbox key missing or not a test key');return;}try{const a=await stripe.accounts.retrieve();console.log(a.id==='acct_1UawRHDQHBbGHBSX'?'Stripe Trade & Tidy sandbox account verified':'Stripe key belongs to another account — checkout disabled');}catch(e){console.warn('Stripe test key verification failed:',e.code||e.type||'unknown');}if(!liveStripe){console.warn('Live Stripe key missing or unrecognised; live checkout remains disabled');return;}try{const a=await liveStripe.accounts.retrieve();liveKeyVerified=a.id==='acct_1UayxSDzYhlkn0Q0';console.log(liveKeyVerified?'Trade & Tidy live Stripe account verified — live checkout disabled':'Live Stripe key belongs to an unexpected account — checkout disabled');}catch(e){console.warn('Live Stripe key validation failed:',e.code||e.type||'unknown');}});

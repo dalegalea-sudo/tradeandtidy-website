@@ -86,7 +86,7 @@ app.get('/download',async(req,res)=>{
     for(let j=0;j<count;j++){
       const x=165+j*47;
       const pts=[];for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5;const rad=k%2?10:23;pts.push([x+rad*Math.cos(a),y+20+rad*Math.sin(a)]);}
-      doc.polygon(...pts.flat()).fill(color);
+      doc.polygon(...pts).fill(color);
     }
     doc.strokeColor('#879ca7').rect(485,y+1,52,44).stroke();
   });

@@ -2,51 +2,61 @@
   "classic-a-proper-cup-of-tea-v1": {
     "name": "A Proper Cup of Tea Poster",
     "amount": 450,
-    "filename": "Trade_and_Tidy_Classic_01_Proper_Cup_of_Tea.pdf"
+    "filename": "Trade_and_Tidy_Classic_01_Proper_Cup_of_Tea.pdf",
+    "price": "price_1UezqGDzYhlkn0Q03niK72Gl"
   },
   "classic-fresh-coffee-fine-company-v1": {
     "name": "Fresh Coffee & Fine Company Poster",
     "amount": 450,
-    "filename": "Trade_and_Tidy_Classic_02_Fresh_Coffee.pdf"
+    "filename": "Trade_and_Tidy_Classic_02_Fresh_Coffee.pdf",
+    "price": "price_1UezqTDzYhlkn0Q0gi0Lz2bB"
   },
   "classic-southend-on-sea-v1": {
     "name": "Southend-on-Sea Poster",
     "amount": 450,
-    "filename": "Trade_and_Tidy_Classic_03_SouthendonSea.pdf"
+    "filename": "Trade_and_Tidy_Classic_03_SouthendonSea.pdf",
+    "price": "price_1UezqSDzYhlkn0Q00GiGJg8A"
   },
   "classic-brighton-by-the-sea-v1": {
     "name": "Brighton by the Sea Poster",
     "amount": 450,
-    "filename": "Trade_and_Tidy_Classic_04_Brighton_by_the_Sea.pdf"
+    "filename": "Trade_and_Tidy_Classic_04_Brighton_by_the_Sea.pdf",
+    "price": "price_1UezqRDzYhlkn0Q0T4JataIo"
   },
   "classic-amalfi-coast-v1": {
     "name": "Amalfi Coast Poster",
     "amount": 450,
-    "filename": "Trade_and_Tidy_Classic_05_Amalfi_Coast.pdf"
+    "filename": "Trade_and_Tidy_Classic_05_Amalfi_Coast.pdf",
+    "price": "price_1UezqVDzYhlkn0Q06HzIFkI5"
   },
   "classic-lake-como-v1": {
     "name": "Lake Como Poster",
     "amount": 450,
-    "filename": "Trade_and_Tidy_Classic_06_Lake_Como.pdf"
+    "filename": "Trade_and_Tidy_Classic_06_Lake_Como.pdf",
+    "price": "price_1UezqUDzYhlkn0Q09kuvcFwW"
   },
   "classic-home-is-where-the-kettle-lives-v1": {
     "name": "Home Is Where the Kettle Lives Poster",
     "amount": 450,
-    "filename": "Trade_and_Tidy_Classic_07_Home_and_the_Kettle.pdf"
+    "filename": "Trade_and_Tidy_Classic_07_Home_and_the_Kettle.pdf",
+    "price": "price_1UezqTDzYhlkn0Q09dPm3L7n"
   },
   "classic-keep-a-little-room-for-joy-v1": {
     "name": "Keep a Little Room for Joy Poster",
     "amount": 450,
-    "filename": "Trade_and_Tidy_Classic_08_Room_for_Joy.pdf"
+    "filename": "Trade_and_Tidy_Classic_08_Room_for_Joy.pdf",
+    "price": "price_1UezqWDzYhlkn0Q0FMxb3ond"
   },
   "classic-fresh-lemonade-v1": {
     "name": "Fresh Lemonade Poster",
     "amount": 450,
-    "filename": "Trade_and_Tidy_Classic_09_Fresh_Lemonade.pdf"
+    "filename": "Trade_and_Tidy_Classic_09_Fresh_Lemonade.pdf",
+    "price": "price_1UezqWDzYhlkn0Q02TZOLKAX"
   },
   "classic-slow-mornings-v1": {
     "name": "Slow Mornings Poster",
     "amount": 450,
-    "filename": "Trade_and_Tidy_Classic_10_Slow_Mornings.pdf"
+    "filename": "Trade_and_Tidy_Classic_10_Slow_Mornings.pdf",
+    "price": "price_1UezqXDzYhlkn0Q00RGlSVAm"
   }
 }

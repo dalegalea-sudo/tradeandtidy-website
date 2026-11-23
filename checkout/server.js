@@ -80,4 +80,4 @@ app.get('/download',async(req,res)=>{
   });
   doc.end();
 });
-app.listen(process.env.PORT||10000,'0.0.0.0',()=>console.log('Trade & Tidy sandbox checkout ready'));
+app.listen(process.env.PORT||10000,'0.0.0.0',async()=>{console.log('Trade & Tidy sandbox service running');if(!stripe){console.warn('Stripe sandbox key missing or not a test key');return;}try{const a=await stripe.accounts.retrieve();console.log(a.id==='acct_1UawRHDQHBbGHBSX'?'Stripe Trade & Tidy sandbox account verified':'Stripe key belongs to another account — checkout disabled');}catch(e){console.warn('Stripe test key verification failed:',e.code||e.type||'unknown');}});

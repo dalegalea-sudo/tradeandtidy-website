@@ -255,6 +255,27 @@ app.get('/download',async(req,res)=>{
  if(!order)return res.status(403).send('Payment not verified.');
  try{productPdf(order.sku,res)}catch(e){console.error('PDF generation failed:',e.message);if(!res.headersSent)res.status(500).send('Download temporarily unavailable. Please contact the shop.');else res.end()}
 });
-app.get('/catalogue-readiness',(_,res)=>{res.set('Cache-Control','no-store');res.json({live_checkout_enabled:!!liveKeyVerified,products:Object.entries(CATALOGUE).map(([sku,p])=>({sku,name:p.name,price_gbp_pence:p.amount,instant_pdf:true}))})});
+const pdfSmoke={started:false,results:{}};
+async function checkPdfGeneration(){
+ if(pdfSmoke.started)return;
+ pdfSmoke.started=true;
+ const {Writable}=require('stream');
+ for(const sku of Object.keys(CATALOGUE)){
+  try{
+   let bytes=0;
+   const sink=new Writable({write(chunk,enc,callback){bytes+=chunk.length;callback()}});
+   sink.set=()=>sink;
+   const result=new Promise((resolve,reject)=>{sink.once('finish',resolve);sink.once('error',reject)});
+   productPdf(sku,sink);
+   await result;
+   if(bytes<2000)throw Error('Generated PDF too small');
+   pdfSmoke.results[sku]={ok:true,size_bytes:bytes};
+  }catch(e){
+   pdfSmoke.results[sku]={ok:false,reason:'PDF generation failed'};
+   console.error('PDF smoke test failed:',sku,e.message);
+  }
+ }
+}
+app.get('/catalogue-readiness',(_,res)=>{res.set('Cache-Control','no-store');res.json({live_checkout_enabled:!!liveKeyVerified,products:Object.entries(CATALOGUE).map(([sku,p])=>({sku,name:p.name,price_gbp_pence:p.amount,instant_pdf:true,pdf_smoke_test:pdfSmoke.results[sku]||{pending:true}}))})});
 app.get('/live-readiness',(_,res)=>{res.set('Cache-Control','no-store');res.json({live_account_verified:liveKeyVerified,live_checkout_enabled:liveKeyVerified,sandbox_checkout_enabled:!!stripe,download_flow_tested_in_sandbox:true});});
-app.listen(process.env.PORT||10000,'0.0.0.0',async()=>{console.log('Trade & Tidy sandbox service running');if(!stripe){console.warn('Stripe sandbox key missing or not a test key');return;}try{const a=await stripe.accounts.retrieve();console.log(a.id==='acct_1UawRHDQHBbGHBSX'?'Stripe Trade & Tidy sandbox account verified':'Stripe key belongs to another account — checkout disabled');}catch(e){console.warn('Stripe test key verification failed:',e.code||e.type||'unknown');}if(!liveStripe){console.warn('Live Stripe key missing or unrecognised; live checkout remains disabled');return;}try{const a=await liveStripe.accounts.retrieve();liveKeyVerified=a.id==='acct_1UayxSDzYhlkn0Q0';console.log(liveKeyVerified?'Trade & Tidy live Stripe account verified — live checkout disabled':'Live Stripe key belongs to an unexpected account — checkout disabled');}catch(e){console.warn('Live Stripe key validation failed:',e.code||e.type||'unknown');}});
+app.listen(process.env.PORT||10000,'0.0.0.0',async()=>{console.log('Trade & Tidy sandbox service running');checkPdfGeneration().catch(e=>console.error('PDF smoke test error:',e.message));if(!stripe){console.warn('Stripe sandbox key missing or not a test key');return;}try{const a=await stripe.accounts.retrieve();console.log(a.id==='acct_1UawRHDQHBbGHBSX'?'Stripe Trade & Tidy sandbox account verified':'Stripe key belongs to another account — checkout disabled');}catch(e){console.warn('Stripe test key verification failed:',e.code||e.type||'unknown');}if(!liveStripe){console.warn('Live Stripe key missing or unrecognised; live checkout remains disabled');return;}try{const a=await liveStripe.accounts.retrieve();liveKeyVerified=a.id==='acct_1UayxSDzYhlkn0Q0';console.log(liveKeyVerified?'Trade & Tidy live Stripe account verified — product checkout enabled':'Live Stripe key belongs to an unexpected account — checkout disabled');}catch(e){console.warn('Live Stripe key validation failed:',e.code||e.type||'unknown');}});

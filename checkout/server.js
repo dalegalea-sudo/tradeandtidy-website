@@ -6,6 +6,7 @@ const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 app.use(express.json({limit: '8kb'}));
+app.use((req,res,next)=>{if(req.headers.origin===SITE){res.set('Access-Control-Allow-Origin',SITE);res.set('Vary','Origin');res.set('Access-Control-Allow-Methods','POST, OPTIONS');res.set('Access-Control-Allow-Headers','Content-Type');}if(req.method==='OPTIONS')return res.sendStatus(204);next();});
 const SITE = 'https://tradeandtidy.onrender.com';
 const PRICE = 'price_1UevPJDQHBbGHBSXb5cv2MBR'; // sandbox only
 const key = process.env.STRIPE_SECRET_KEY || '';
